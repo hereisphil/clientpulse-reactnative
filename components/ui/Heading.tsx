@@ -13,9 +13,9 @@ export default function Heading({ children, level, color }: HeadingProps) {
       accessibilityRole="header"
       style={[
         styles.heading,
-        level === 1 && { fontSize: 32 },
-        level === 2 && { fontSize: 28 },
-        level === 3 && { fontSize: 24 },
+        level === 1 && { fontSize: 40 },
+        level === 2 && { fontSize: 36 },
+        level === 3 && { fontSize: 32 },
         color && { color: `${color}` },
       ]}
     >

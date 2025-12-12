@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 const appstyles = StyleSheet.create({
   heading: {
     fontWeight: "bold",
-    fontSize: 20,
+    fontSize: 24,
     color: "#f8fafc",
   },
   flexColumnContainer: {
@@ -19,6 +19,12 @@ const appstyles = StyleSheet.create({
     marginRight: 5,
     textAlign: "center",
     color: "#62748e",
+    fontSize: 18,
+  },
+  mainContainer: {
+    flex: 1,
+    backgroundColor: "#020618",
+    alignItems: "center",
   },
 });
 
