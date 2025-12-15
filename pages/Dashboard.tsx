@@ -2,13 +2,15 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { Alert, Button, Text, View } from "react-native";
+import { Alert, Button, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Heading from "../components/ui/Heading";
+import ParagraphText from "../components/ui/ParagraphText";
 import deleteClient from "../services/deleteClient";
 import fetchAllClients from "../services/fetchAllClients";
+import postClient from "../services/postClient";
 import styles from "../styles/appstyles";
-import type { Client, RootStackParamList } from "../utils/types";
+import type { Client, NewClient, RootStackParamList } from "../utils/types";
 
 type DashboardScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -20,6 +22,11 @@ export default function Dashboard({ navigation }: DashboardScreenProps) {
   const [reload, setReload] = useState(0);
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [clientInfo, setClientInfo] = useState<NewClient>({
+    name: "",
+    status: "",
+  });
 
   useEffect(() => {
     (async () => {
@@ -52,7 +59,6 @@ export default function Dashboard({ navigation }: DashboardScreenProps) {
 
   const handleDelete = async (id: string) => {
     const response = await deleteClient(id);
-    console.log("Response >>>", response);
     if (response) {
       Alert.alert("Successfully deleted");
       setReload((state) => state + 1);
@@ -61,49 +67,110 @@ export default function Dashboard({ navigation }: DashboardScreenProps) {
     }
   };
 
+  const handleSubmit = async (body: NewClient) => {
+    const response = await postClient(body);
+    if (response) {
+      Alert.alert(`Successfully added ${body.name}`);
+      setReload((state) => state + 1);
+    } else {
+      Alert.alert("Something went wrong");
+    }
+  };
+
   return (
     <SafeAreaView style={styles.mainContainer}>
-      <Heading level={1}>Dashboard</Heading>
-      <Button
-        title="Go back Home"
-        onPress={() => navigation.navigate("Home")}
-      />
-      {isLoading ? (
-        <Text style={styles.loadingText}>Loading Clients...</Text>
-      ) : (
-        clients.map((client) => (
-          <View key={client._id} style={styles.clientCard}>
-            <View style={styles.row}>
-              <Text style={styles.label}>Name:</Text>
-              <Text style={styles.value}>{client.name}</Text>
-            </View>
-
-            <View style={styles.row}>
-              <Text style={styles.label}>Status:</Text>
-              <Text style={styles.value}>{client.status}</Text>
-            </View>
-
-            {client.serviceType && (
+      <ScrollView>
+        <Heading level={1}>Dashboard</Heading>
+        <Button
+          title="Go back Home"
+          onPress={() => navigation.navigate("Home")}
+        />
+        {isLoading ? (
+          <Text style={styles.loadingText}>Loading Clients...</Text>
+        ) : (
+          clients.map((client) => (
+            <View key={client._id} style={styles.clientCard}>
               <View style={styles.row}>
-                <Text style={styles.label}>Service:</Text>
-                <Text style={styles.value}>{client.serviceType}</Text>
+                <Text style={styles.label}>Name:</Text>
+                <Text style={styles.value}>{client.name}</Text>
               </View>
-            )}
 
-            {client.notes?.length ? (
               <View style={styles.row}>
-                <Text style={styles.label}>Notes:</Text>
-                <Text style={styles.value} numberOfLines={2}>
-                  {client.notes.join(", ")}
-                </Text>
+                <Text style={styles.label}>Status:</Text>
+                <Text style={styles.value}>{client.status}</Text>
               </View>
-            ) : null}
-            <Button onPress={() => handleDelete(client._id)} title="Delete" />
-          </View>
-        ))
-      )}
-      {message && <Text style={styles.loadingText}>{message}</Text>}
-      <StatusBar style="auto" />
+
+              {client.serviceType && (
+                <View style={styles.row}>
+                  <Text style={styles.label}>Service:</Text>
+                  <Text style={styles.value}>{client.serviceType}</Text>
+                </View>
+              )}
+
+              {client.notes?.length ? (
+                <View style={styles.row}>
+                  <Text style={styles.label}>Notes:</Text>
+                  <Text style={styles.value} numberOfLines={2}>
+                    {client.notes.join(", ")}
+                  </Text>
+                </View>
+              ) : null}
+              <Button onPress={() => handleDelete(client._id)} title="Delete" />
+            </View>
+          ))
+        )}
+        {message && <Text style={styles.loadingText}>{message}</Text>}
+        <View style={styles.form}>
+          <ParagraphText>Add a new client:</ParagraphText>
+          <TextInput
+            placeholder="Enter client's name"
+            style={styles.textInput}
+            autoCapitalize="none"
+            autoComplete="off"
+            autoCorrect={false}
+            placeholderTextColor="#90a1b9"
+            onChangeText={(val) =>
+              setClientInfo((prev) => ({ ...prev, name: val }))
+            }
+          />
+          {clientInfo.name === "" && (
+            <Text
+              style={{
+                color: "#90a1b9",
+                marginBottom: 15,
+                textAlign: "center",
+              }}
+            >
+              Client name is required
+            </Text>
+          )}
+          <TextInput
+            placeholder="Enter client's status"
+            placeholderTextColor="#90a1b9"
+            style={styles.textInput}
+            onChangeText={(val) =>
+              setClientInfo((prev) => ({ ...prev, status: val }))
+            }
+          />
+          {clientInfo.status === "" && (
+            <Text
+              style={{
+                color: "#90a1b9",
+                marginBottom: 15,
+                textAlign: "center",
+              }}
+            >
+              Client status is required
+            </Text>
+          )}
+          <Button
+            onPress={() => handleSubmit(clientInfo)}
+            title="Submit"
+            disabled={clientInfo.name === "" || clientInfo.status === ""}
+          />
+        </View>
+        <StatusBar style="auto" />
+      </ScrollView>
     </SafeAreaView>
   );
 }

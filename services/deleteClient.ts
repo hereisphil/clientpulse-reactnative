@@ -9,7 +9,6 @@ const deleteClient = async (id: string) => {
     if (response.ok) {
       return true;
     } else {
-      console.log("Delete Response >>>", response);
       return false;
     }
   } catch (error) {

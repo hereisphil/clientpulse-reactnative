@@ -31,7 +31,7 @@ const appstyles = StyleSheet.create({
     paddingHorizontal: 10,
   },
 
-  // ALL DASHBOARD CLIENT STYLING IS BELOW
+  // BEGIN CLIENT CARD STYLING
   loadingText: {
     fontSize: 28,
     fontWeight: "800",
@@ -46,11 +46,9 @@ const appstyles = StyleSheet.create({
     paddingVertical: 28,
     paddingHorizontal: 26,
     marginVertical: 14,
-    width: "90%",
-    maxWidth: 360,
 
     // iOS shadow
-    shadowColor: "#000",
+    shadowColor: "#fff",
     shadowOpacity: 0.25,
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 10 },
@@ -79,6 +77,25 @@ const appstyles = StyleSheet.create({
     color: "#ffffff",
     flexShrink: 1,
     textAlign: "right",
+  },
+
+  // BEGIN POST CLIENT FROM STYLING
+  form: {
+    borderWidth: 1,
+    borderColor: "#90a1b9",
+    paddingVertical: 5,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginTop: 30,
+  },
+
+  textInput: {
+    height: 50,
+    borderColor: "#fff",
+    color: "#fff",
+    borderWidth: 1,
+    padding: 10,
+    marginVertical: 12,
   },
 });
 

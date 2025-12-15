@@ -9,11 +9,15 @@ type ContactInfo = {
   website?: string[];
 };
 
-export type Client = {
-  _id: string;
+// NewClient is for the POST where an _id doesn't exist
+export type NewClient = {
   name: string;
   status: string;
-  contactInfo?: ContactInfo;
   serviceType?: string;
   notes?: string[];
+  contactInfo?: ContactInfo;
+};
+
+export type Client = NewClient & {
+  _id: string;
 };

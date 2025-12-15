@@ -1,21 +1,9 @@
-type ContactInfo = {
-  phone?: string[];
-  email?: string[];
-  website?: string[];
-};
-
-interface Client {
-  name: string;
-  status: string;
-  contactInfo?: ContactInfo;
-  serviceType?: string;
-  notes?: string[];
-}
+import type { NewClient } from "../utils/types";
 
 const baseUrl = "https://clientpulse-dusky.vercel.app/api/v1";
 // const baseUrl = "http://127.0.0.1:8001/api/v1";
 
-const postNewClient = async (body: Client) => {
+const postClient = async (body: NewClient) => {
   try {
     const response = await fetch(`${baseUrl}/client`, {
       method: "POST",
@@ -28,7 +16,6 @@ const postNewClient = async (body: Client) => {
     if (response.ok) {
       return true;
     } else {
-      console.log("Post Response >>>", response);
       return false;
     }
   } catch (error) {
@@ -37,4 +24,4 @@ const postNewClient = async (body: Client) => {
   }
 };
 
-export default postNewClient;
+export default postClient;
