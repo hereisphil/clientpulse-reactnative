@@ -2,7 +2,18 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { Alert, Button, ScrollView, Text, TextInput, View } from "react-native";
+import {
+  Alert,
+  Button,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Heading from "../components/ui/Heading";
 import ParagraphText from "../components/ui/ParagraphText";
@@ -68,6 +79,7 @@ export default function Dashboard({ navigation }: DashboardScreenProps) {
   };
 
   const handleSubmit = async (body: NewClient) => {
+    Keyboard.dismiss();
     const response = await postClient(body);
     if (response) {
       Alert.alert(`Successfully added ${body.name}`);
@@ -79,98 +91,112 @@ export default function Dashboard({ navigation }: DashboardScreenProps) {
 
   return (
     <SafeAreaView style={styles.mainContainer}>
-      <ScrollView>
-        <Heading level={1}>Dashboard</Heading>
-        <Button
-          title="Go back Home"
-          onPress={() => navigation.navigate("Home")}
-        />
-        {isLoading ? (
-          <Text style={styles.loadingText}>Loading Clients...</Text>
-        ) : (
-          clients.map((client) => (
-            <View key={client._id} style={styles.clientCard}>
-              <View style={styles.row}>
-                <Text style={styles.label}>Name:</Text>
-                <Text style={styles.value}>{client.name}</Text>
-              </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+        >
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingBottom: 40 }}
+          >
+            <Heading level={1}>Dashboard</Heading>
+            <Button
+              title="Go back Home"
+              onPress={() => navigation.navigate("Home")}
+            />
+            {isLoading ? (
+              <Text style={styles.loadingText}>Loading Clients...</Text>
+            ) : (
+              clients.map((client) => (
+                <View key={client._id} style={styles.clientCard}>
+                  <View style={styles.row}>
+                    <Text style={styles.label}>Name:</Text>
+                    <Text style={styles.value}>{client.name}</Text>
+                  </View>
 
-              <View style={styles.row}>
-                <Text style={styles.label}>Status:</Text>
-                <Text style={styles.value}>{client.status}</Text>
-              </View>
+                  <View style={styles.row}>
+                    <Text style={styles.label}>Status:</Text>
+                    <Text style={styles.value}>{client.status}</Text>
+                  </View>
 
-              {client.serviceType && (
-                <View style={styles.row}>
-                  <Text style={styles.label}>Service:</Text>
-                  <Text style={styles.value}>{client.serviceType}</Text>
+                  {client.serviceType && (
+                    <View style={styles.row}>
+                      <Text style={styles.label}>Service:</Text>
+                      <Text style={styles.value}>{client.serviceType}</Text>
+                    </View>
+                  )}
+
+                  {client.notes?.length ? (
+                    <View style={styles.row}>
+                      <Text style={styles.label}>Notes:</Text>
+                      <Text style={styles.value} numberOfLines={2}>
+                        {client.notes.join(", ")}
+                      </Text>
+                    </View>
+                  ) : null}
+                  <Button
+                    onPress={() => handleDelete(client._id)}
+                    title="Delete"
+                  />
                 </View>
+              ))
+            )}
+            {message && <Text style={styles.loadingText}>{message}</Text>}
+            <View style={styles.form}>
+              <ParagraphText>Add a new client:</ParagraphText>
+              <TextInput
+                placeholder="Enter client's name"
+                style={styles.textInput}
+                autoCapitalize="none"
+                autoComplete="off"
+                autoCorrect={false}
+                placeholderTextColor="#90a1b9"
+                onChangeText={(val) =>
+                  setClientInfo((prev) => ({ ...prev, name: val }))
+                }
+              />
+              {clientInfo.name === "" && (
+                <Text
+                  style={{
+                    color: "#90a1b9",
+                    marginBottom: 15,
+                    textAlign: "center",
+                  }}
+                >
+                  Client name is required
+                </Text>
               )}
-
-              {client.notes?.length ? (
-                <View style={styles.row}>
-                  <Text style={styles.label}>Notes:</Text>
-                  <Text style={styles.value} numberOfLines={2}>
-                    {client.notes.join(", ")}
-                  </Text>
-                </View>
-              ) : null}
-              <Button onPress={() => handleDelete(client._id)} title="Delete" />
+              <TextInput
+                placeholder="Enter client's status"
+                placeholderTextColor="#90a1b9"
+                style={styles.textInput}
+                onChangeText={(val) =>
+                  setClientInfo((prev) => ({ ...prev, status: val }))
+                }
+              />
+              {clientInfo.status === "" && (
+                <Text
+                  style={{
+                    color: "#90a1b9",
+                    marginBottom: 15,
+                    textAlign: "center",
+                  }}
+                >
+                  Client status is required
+                </Text>
+              )}
+              <Button
+                onPress={() => handleSubmit(clientInfo)}
+                title="Submit"
+                disabled={clientInfo.name === "" || clientInfo.status === ""}
+              />
             </View>
-          ))
-        )}
-        {message && <Text style={styles.loadingText}>{message}</Text>}
-        <View style={styles.form}>
-          <ParagraphText>Add a new client:</ParagraphText>
-          <TextInput
-            placeholder="Enter client's name"
-            style={styles.textInput}
-            autoCapitalize="none"
-            autoComplete="off"
-            autoCorrect={false}
-            placeholderTextColor="#90a1b9"
-            onChangeText={(val) =>
-              setClientInfo((prev) => ({ ...prev, name: val }))
-            }
-          />
-          {clientInfo.name === "" && (
-            <Text
-              style={{
-                color: "#90a1b9",
-                marginBottom: 15,
-                textAlign: "center",
-              }}
-            >
-              Client name is required
-            </Text>
-          )}
-          <TextInput
-            placeholder="Enter client's status"
-            placeholderTextColor="#90a1b9"
-            style={styles.textInput}
-            onChangeText={(val) =>
-              setClientInfo((prev) => ({ ...prev, status: val }))
-            }
-          />
-          {clientInfo.status === "" && (
-            <Text
-              style={{
-                color: "#90a1b9",
-                marginBottom: 15,
-                textAlign: "center",
-              }}
-            >
-              Client status is required
-            </Text>
-          )}
-          <Button
-            onPress={() => handleSubmit(clientInfo)}
-            title="Submit"
-            disabled={clientInfo.name === "" || clientInfo.status === ""}
-          />
-        </View>
-        <StatusBar style="auto" />
-      </ScrollView>
+            <StatusBar style="auto" />
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 }
