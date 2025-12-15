@@ -28,6 +28,7 @@ const appstyles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#020618",
     alignItems: "center",
+    paddingHorizontal: 10,
   },
 
   // ALL DASHBOARD CLIENT STYLING IS BELOW

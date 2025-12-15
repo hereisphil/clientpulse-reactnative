@@ -2,9 +2,10 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { Button, Text, View } from "react-native";
+import { Alert, Button, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Heading from "../components/ui/Heading";
+import deleteClient from "../services/deleteClient";
 import fetchAllClients from "../services/fetchAllClients";
 import styles from "../styles/appstyles";
 import type { Client, RootStackParamList } from "../utils/types";
@@ -15,24 +16,50 @@ type DashboardScreenProps = NativeStackScreenProps<
 >;
 
 export default function Dashboard({ navigation }: DashboardScreenProps) {
+  const [message, setMessage] = useState("");
+  const [reload, setReload] = useState(0);
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // HA! Use an IIFE is so much cleaner!!
     (async () => {
       setIsLoading(true);
+      setMessage("");
       try {
-        const clients = await fetchAllClients();
-        console.log(clients);
-        setClients(clients);
+        const response = await fetchAllClients();
+        if (!response) {
+          setClients([]);
+          return Alert.alert("Something went wrong. No clients loaded");
+        } else if (response === 1) {
+          setClients([]);
+          setMessage(
+            "No clients found. You may add a client with the form below."
+          );
+        } else if (response === 2) {
+          setClients([]);
+          Alert.alert("Something went wrong. No clients loaded");
+          setMessage("Something went wrong. No clients loaded");
+        } else {
+          setClients(response.clients);
+        }
       } catch (error) {
         console.log(error);
       } finally {
         setIsLoading(false);
       }
     })();
-  }, []);
+  }, [reload]);
+
+  const handleDelete = async (id: string) => {
+    const response = await deleteClient(id);
+    console.log("Response >>>", response);
+    if (response) {
+      Alert.alert("Successfully deleted");
+      setReload((state) => state + 1);
+    } else {
+      Alert.alert("Something went wrong");
+    }
+  };
 
   return (
     <SafeAreaView style={styles.mainContainer}>
@@ -71,9 +98,11 @@ export default function Dashboard({ navigation }: DashboardScreenProps) {
                 </Text>
               </View>
             ) : null}
+            <Button onPress={() => handleDelete(client._id)} title="Delete" />
           </View>
         ))
       )}
+      {message && <Text style={styles.loadingText}>{message}</Text>}
       <StatusBar style="auto" />
     </SafeAreaView>
   );
